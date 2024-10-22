@@ -9,3 +9,10 @@ variable "clusterName" {
   type        = string
   default     = "vprofile-eks"
 }
+
+
+variable "BucketName" {
+  description = "S3 BucketName"
+  type        = string
+  default     = "<YourS3Bucket>"
+}
