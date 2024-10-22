@@ -1,4 +1,4 @@
-name: "vprofile IAC"
+name: "Privisioning Infrastructure (IAC)"
 on: 
   push:
     branches:
@@ -25,28 +25,27 @@ env:
 jobs:
   terraform:
     name: "apply terraform code changes"
-    #elrunner 3ashan github actions feh containers (runners) keter
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
         working-directory: ./terraform
     steps:
-    #efta7 GitHub market place 3shan feh el pre-built runner steps ele momkn te5tsr el dnia msh lazm apt install
+    #Using GitHub Runner and GitHub Actions from GitHub MarketPlace
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: setup terraform with specified version on the runner (elcontainer bel ubuntu img)
+      - name: setup terraform with specified version on the runner 
         uses: hashicorp/setup-terraform@v2
 
       - name: Terraform initialization
         id: init 
-        run: terraform init -backend-config="bucket=$BUCKET_TF_STATE"
+        run: terraform init --backend-config="bucket=$BUCKET_TF_STATE"
       
-      #- name: Terraform Format
-       # id: fmt
-       # run: terraform fmt -check
-        # if the format of this code is not correct the workflow will fail
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt 
+
 
       - name: terraform validation
         id: validate
@@ -54,19 +53,18 @@ jobs:
 
       - name: terraform planning
         id: plan
-        #no input hytlobo, we hystore el output fe file esmo planfile, da 3shan kan feh bug fa to avoid parallel exec on TF
-        run: terraform plan -no-color -input=false -out planfile
+        run: terraform plan --no-color --input=false --out planfile
+        # we used an output file to avoid a bug in the parallel execution mechanism of terraform
         continue-on-error: true
 
       - name: terraform plan status
         if: steps.plan.outcome == 'failure'
-        # law 7asal failure fel plan hn KILL el container
         run: exit 1  
 
       - name: Terraform Apply
         id: apple
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false -parallelism=1 planfile
+        run: terraform apply --auto-approve --input=false --parallelism=1 planfile
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
